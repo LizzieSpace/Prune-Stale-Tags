@@ -1,235 +1,72 @@
-# Create a GitHub Action Using TypeScript
+    # Prune tags Action
 
-[![GitHub Super-Linter](https://github.com/actions/typescript-action/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
-![CI](https://github.com/actions/typescript-action/actions/workflows/ci.yml/badge.svg)
-[![Check dist/](https://github.com/actions/typescript-action/actions/workflows/check-dist.yml/badge.svg)](https://github.com/actions/typescript-action/actions/workflows/check-dist.yml)
-[![CodeQL](https://github.com/actions/typescript-action/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/actions/typescript-action/actions/workflows/codeql-analysis.yml)
-[![Coverage](./badges/coverage.svg)](./badges/coverage.svg)
+GitHub Action that prunes selected releases and tags according to their age.
 
-Use this template to bootstrap the creation of a TypeScript action. :rocket:
+## Action Inputs
+| Input name                 | Description                                                                               	                                                                                                                                                                                                 | Required 	 | Default Value        |
+|----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|----------------------|
+| allowUpdates               | An optional flag which indicates if we should update a release if it already exists. Defaults to false.                                                                                                                                                                                     | false      | ""                   |
+| artifactErrorsFailBuild    | An optional flag which indicates if artifact read or upload errors should fail the build.                                                                                                                                                                                                   | false      | ""                   |
+| artifacts                  | An optional set of paths representing artifacts to upload to the release. This may be a single path or a comma delimited list of paths (or globs)                                                                                                                                           | false      | ""                   |
+| artifactContentType        | The content type of the artifact. Defaults to raw                                                                                                                                                                                                                                           | false      | ""                   |
+| body                       | An optional body for the release. Note: This input will have white space trimmed before and after it. Use `bodyFile` if you need a non-trivial markdown body.                                                                                                                               | false      | ""                   |
+| bodyFile                   | An optional body file for the release. This should be the path to the file.                                                                                                                                                                                                                 | false      | ""                   |
+| commit                     | An optional commit reference. This will be used to create the tag if it does not exist.                                                                                                                                                                                                     | false      | ""                   |
+| discussionCategory         | When provided this will generate a discussion of the specified category. The category must exist otherwise this will cause the action to fail. This isn't used with draft releases. The default "Announcements" category is not supported via the API and will cause an error if used here. | false      | ""                   |
+| draft                      | Optionally marks this release as a draft release. Set to true to enable.                                                                                                                                                                                                                    | false      | ""                   |
+| generateReleaseNotes       | Indicates if release notes should be automatically generated.                                                                                                                                                                                                                               | false      | false                |
+| makeLatest                 | Indicates if the release should be the "latest" release or not. legacy specifies that the latest release should be determined based on the release creation date and higher semantic version.                                                                                               | false      | "legacy"             |
+| name                       | An optional name for the release. If this is omitted the tag will be used.                                                                                                                                                                                                                  | false      | ""                   |
+| omitBody                   | Indicates if the release body should be omitted.                                                                                                                                                                                                                                            | false      | false                |
+| omitBodyDuringUpdate       | Indicates if the release body should be omitted during updates. The body will still be applied for newly created releases. This will preserve the existing body during updates.                                                                                                             | false      | false                |
+| omitDraftDuringUpdate      | Indicates if the draft flag should be omitted during updates. The draft flag will still be applied for newly created releases. This will preserve the existing draft state during updates.                                                                                                  | false      | false                |
+| omitName                   | Indicates if the release name should be omitted.                                                                                                                                                                                                                                            | false      | false                |
+| omitNameDuringUpdate       | Indicates if the release name should be omitted during updates. The name will still be applied for newly created releases. This will preserve the existing name during updates.                                                                                                             | false      | false                |
+| omitPrereleaseDuringUpdate | Indicates if the prerelease flag should be omitted during updates. The prerelease flag will still be applied for newly created releases. This will preserve the existing prerelease state during updates.                                                                                   | false      | false                |
+| owner                      | Optionally specify the owner of the repo where the release should be generated. Defaults to current repo's owner.                                                                                                                                                                           | false      | "current repo owner" |
+| prerelease                 | Optionally marks this release as prerelease. Set to true to enable.                                                                                                                                                                                                                         | false      | ""                   |
+| removeArtifacts            | Indicates if existing release artifacts should be removed.                                                                                                                                                                                                                                  | false      | false                |
+| replacesArtifacts          | Indicates if existing release artifacts should be replaced.                                                                                                                                                                                                                                 | false      | true                 |
+| repo                       | Optionally specify the repo where the release should be generated.                                                                                                                                                                                                                          | false      | current repo         |
+| skipIfReleaseExists        | When skipIfReleaseExists is enabled the action will be skipped if a non-draft release already exists for the provided tag.                                                                                                                                                                  | false      | false                |
+| tag                        | An optional tag for the release. If this is omitted the git ref will be used (if it is a tag).                                                                                                                                                                                              | false      | ""                   |
+| token                      | The GitHub token. This will default to the GitHub app token. This is primarily useful if you want to use your personal token (for targeting other repos, etc).  If you are using a personal access token it should have access to the `repo` scope.                                         | false      | github.token         |
+| updateOnlyUnreleased       | When allowUpdates is enabled, this will fail the action if the release it is updating is not a draft or a prerelease.                                                                                                                                                                       | false      | false                |
 
-This template includes compilation support, tests, a validation workflow,
-publishing, and versioning guidance.
+## Action Outputs
+| Output name | Description                                   |
+|-------------|-----------------------------------------------|
+| id          | The identifier of the created release.        |
+| html_url    | The HTML URL of the release.                  |
+| upload_url  | The URL for uploading assets to the release.  |
 
-If you are new, there's also a simpler introduction in the
-[Hello world JavaScript action repository](https://github.com/actions/hello-world-javascript-action).
+## Example
+This example will create a release when a tag is pushed:
 
-## Create Your Own Action
+```yml
+name: Releases
 
-To create your own action, you can use this repository as a template! Just
-follow the below instructions:
+on: 
+  push:
+    tags:
+    - '*'
 
-1. Click the **Use this template** button at the top of the repository
-1. Select **Create a new repository**
-1. Select an owner and name for your new repository
-1. Click **Create repository**
-1. Clone your new repository
+jobs:
 
-> [!IMPORTANT]
->
-> Make sure to remove or update the [`CODEOWNERS`](./CODEOWNERS) file! For
-> details on how to use this file, see
-> [About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners).
-
-## Initial Setup
-
-After you've cloned the repository to your local machine or codespace, you'll
-need to perform some initial setup steps before you can develop your action.
-
-> [!NOTE]
->
-> You'll need to have a reasonably modern version of
-> [Node.js](https://nodejs.org) handy (20.x or later should work!). If you are
-> using a version manager like [`nodenv`](https://github.com/nodenv/nodenv) or
-> [`nvm`](https://github.com/nvm-sh/nvm), this template has a `.node-version`
-> file at the root of the repository that will be used to automatically switch
-> to the correct version when you `cd` into the repository. Additionally, this
-> `.node-version` file is used by GitHub Actions in any `actions/setup-node`
-> actions.
-
-1. :hammer_and_wrench: Install the dependencies
-
-   ```bash
-   npm install
-   ```
-
-1. :building_construction: Package the TypeScript for distribution
-
-   ```bash
-   npm run bundle
-   ```
-
-1. :white_check_mark: Run the tests
-
-   ```bash
-   $ npm test
-
-   PASS  ./index.test.js
-     ✓ throws invalid number (3ms)
-     ✓ wait 500 ms (504ms)
-     ✓ test runs (95ms)
-
-   ...
-   ```
-
-## Update the Action Metadata
-
-The [`action.yml`](action.yml) file defines metadata about your action, such as
-input(s) and output(s). For details about this file, see
-[Metadata syntax for GitHub Actions](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions).
-
-When you copy this repository, update `action.yml` with the name, description,
-inputs, and outputs for your action.
-
-## Update the Action Code
-
-The [`src/`](./src/) directory is the heart of your action! This contains the
-source code that will be run when your action is invoked. You can replace the
-contents of this directory with your own code.
-
-There are a few things to keep in mind when writing your action code:
-
-- Most GitHub Actions toolkit and CI/CD operations are processed asynchronously.
-  In `main.ts`, you will see that the action is run in an `async` function.
-
-  ```javascript
-  import * as core from '@actions/core'
-  //...
-
-  async function run() {
-    try {
-      //...
-    } catch (error) {
-      core.setFailed(error.message)
-    }
-  }
-  ```
-
-  For more information about the GitHub Actions toolkit, see the
-  [documentation](https://github.com/actions/toolkit/blob/master/README.md).
-
-So, what are you waiting for? Go ahead and start customizing your action!
-
-1. Create a new branch
-
-   ```bash
-   git checkout -b releases/v1
-   ```
-
-1. Replace the contents of `src/` with your action code
-1. Add tests to `__tests__/` for your source code
-1. Format, test, and build the action
-
-   ```bash
-   npm run all
-   ```
-
-   > This step is important! It will run [`ncc`](https://github.com/vercel/ncc)
-   > to build the final JavaScript action code with all dependencies included.
-   > If you do not run this step, your action will not work correctly when it is
-   > used in a workflow. This step also includes the `--license` option for
-   > `ncc`, which will create a license file for all of the production node
-   > modules used in your project.
-
-1. Commit your changes
-
-   ```bash
-   git add .
-   git commit -m "My first action is ready!"
-   ```
-
-1. Push them to your repository
-
-   ```bash
-   git push -u origin releases/v1
-   ```
-
-1. Create a pull request and get feedback on your action
-1. Merge the pull request into the `main` branch
-
-Your action is now published! :rocket:
-
-For information about versioning your action, see
-[Versioning](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-in the GitHub Actions toolkit.
-
-## Validate the Action
-
-You can now validate the action by referencing it in a workflow file. For
-example, [`ci.yml`](./.github/workflows/ci.yml) demonstrates how to reference an
-action in the same repository.
-
-```yaml
-steps:
-  - name: Checkout
-    id: checkout
-    uses: actions/checkout@v4
-
-  - name: Test Local Action
-    id: test-action
-    uses: ./
-    with:
-      milliseconds: 1000
-
-  - name: Print Output
-    id: output
-    run: echo "${{ steps.test-action.outputs.time }}"
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: "release.tar.gz,foo/*.txt"
+        bodyFile: "body.md"
 ```
 
-For example workflow runs, check out the
-[Actions tab](https://github.com/actions/typescript-action/actions)! :rocket:
-
-## Usage
-
-After testing, you can create version tag(s) that developers can use to
-reference different stable versions of your action. For more information, see
-[Versioning](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-in the GitHub Actions toolkit.
-
-To include the action in a workflow in another repository, you can use the
-`uses` syntax with the `@` symbol to reference a specific branch, tag, or commit
-hash.
-
-```yaml
-steps:
-  - name: Checkout
-    id: checkout
-    uses: actions/checkout@v4
-
-  - name: Test Local Action
-    id: test-action
-    uses: actions/typescript-action@v1 # Commit with the `v1` tag
-    with:
-      milliseconds: 1000
-
-  - name: Print Output
-    id: output
-    run: echo "${{ steps.test-action.outputs.time }}"
-```
-
-## Publishing a New Release
-
-This project includes a helper script, [`script/release`](./script/release)
-designed to streamline the process of tagging and pushing new releases for
-GitHub Actions.
-
-GitHub Actions allows users to select a specific version of the action to use,
-based on release tags. This script simplifies this process by performing the
-following steps:
-
-1. **Retrieving the latest release tag:** The script starts by fetching the most
-   recent SemVer release tag of the current branch, by looking at the local data
-   available in your repository.
-1. **Prompting for a new release tag:** The user is then prompted to enter a new
-   release tag. To assist with this, the script displays the tag retrieved in
-   the previous step, and validates the format of the inputted tag (vX.X.X). The
-   user is also reminded to update the version field in package.json.
-1. **Tagging the new release:** The script then tags a new release and syncs the
-   separate major tag (e.g. v1, v2) with the new release tag (e.g. v1.0.0,
-   v2.1.2). When the user is creating a new major release, the script
-   auto-detects this and creates a `releases/v#` branch for the previous major
-   version.
-1. **Pushing changes to remote:** Finally, the script pushes the necessary
-   commits, tags and branches to the remote repository. From here, you will need
-   to create a new release in GitHub so users can easily reference the new tags
-   in their workflows.
+## Notes
+- You must provide a tag either via the action input or the git ref (i.e push / create a tag). If you do not provide a tag the action will fail.
+- If the tag of the release you are creating does not yet exist, you should set both the `tag` and `commit` action inputs. `commit` can point to a commit hash or a branch name (ex - `main`).
+- In the example above only required permissions for the action specified (which is `contents: write`). If you add other actions to the same workflow you should expand `permissions` block accordingly.
+- More info about why the default discussion category "Announcements" does not work with this action may be found here: https://github.com/goreleaser/goreleaser/issues/2304.

@@ -57,8 +57,18 @@ jobs:
         id: test-action
         uses: ./
         with:
-          milliseconds: 2000
+          pattern: '.*'
+          retention: '3'
+          prune-tags: 'false'
+          rm-releases: 'false'
+          dry-run: 'false'
+          token: '${{github.token}}'
 
       - name: Print Output
+        if: steps.test-action.outputs.pruned-tags
         id: output
-        run: echo "${{ steps.test-action.outputs.time }}"
+        run: |
+          echo "
+          pruned the following tags:
+          ${{steps.test-action.outputs.pruned-tags }}
+          " >> $GITHUB_STEP_SUMMARY

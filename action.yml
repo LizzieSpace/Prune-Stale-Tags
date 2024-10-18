@@ -1,23 +1,53 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
+name: 'prune Releases'
+description:
+  'GitHub Action that prunes selected releases and tags according to their age'
 author: 'Your name or organization here'
 
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: 'heart'
-  color: 'red'
+  icon: 'delete'
+  color: 'black'
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  pattern:
+    description: 'Regex search pattern to match tags against'
     required: true
-    default: '1000'
+    default: '.*'
+  retention:
+    description: 'Number of tags to keep from latest tags.'
+    required: false
+    default: 3
+  prune-tags:
+    type: boolean
+    description: 'whether to prune associated tags'
+    required: false
+    default: false
+  rm-releases:
+    type: boolean
+    description: 'whether to remove associated releases'
+    required: false
+    default: false
+  dry-run:
+    type: boolean
+    description: 'whether to remove associated releases'
+    required: false
+    default: false
+  token:
+    description: 'Authentication token used'
+    required: false
+    default: '${{github.token}}'
+  repo-owner:
+    description: 'for when you wish to target other repository'
+    required: false
+  repo-name:
+    description: 'for when you wish to target other repository'
+    required: false
 
 # Define your outputs here.
 outputs:
-  time:
-    description: 'Your output description here'
+  pruned-tags:
+    description: 'List of tags that got pruned'
 
 runs:
   using: node20

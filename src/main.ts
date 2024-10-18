@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
-import { wait } from './wait'
+import * as github from '@actions/github'
+import { matchRefs } from './refs'
 
 /**
  * The main function for the action.
@@ -7,18 +8,43 @@ import { wait } from './wait'
  */
 export async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
+    const pattern: RegExp = new RegExp(
+      core.getInput('match-pattern', { required: true, trimWhitespace: false })
+    )
+    const retention: number = parseInt(core.getInput('retention'))
 
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`)
+    const prune_tags: boolean = core.getBooleanInput('match-pattern')
+    const rm_releases: boolean = core.getBooleanInput('rm-releases')
+    const dry_run: boolean = core.getBooleanInput('dry_run')
 
-    // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
+    let repo_name: string = core.getInput('repo-name')
+    let repo_owner: string = core.getInput('repo-owner')
+    const token: string = core.getInput('token')
+
+    core.setSecret(token)
+
+    if (isNaN(retention)) {
+      throw new TypeError('Not a number')
+    }
+    repo_name = repo_name == '' ? github.context.repo.repo : repo_name
+    repo_owner = repo_owner == '' ? github.context.repo.owner : repo_owner
+
+    let matched_refs = await matchRefs(
+      pattern,
+      repo_owner,
+      repo_name,
+      token,
+      retention,
+      rm_releases,
+      prune_tags,
+      dry_run
+    )
+
+    // Log the current timestamp, refs, then log the new timestamp
     core.debug(new Date().toTimeString())
 
     // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString())
+    core.setOutput('pruned-tags', JSON.stringify(matched_refs))
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
