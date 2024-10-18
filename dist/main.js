@@ -33,8 +33,8 @@ const refs_1 = require("./refs");
  */
 async function run() {
     try {
-        const pattern = new RegExp(core.getInput('match-pattern', { required: true, trimWhitespace: false }));
-        const retention = parseInt(core.getInput('retention'));
+        const pattern = new RegExp(core.getInput('pattern', { required: true, trimWhitespace: false }));
+        const retention = parseInt(core.getInput('retention', { required: true }));
         const rm_tags = core.getBooleanInput('rm-tags');
         const rm_releases = core.getBooleanInput('rm-releases');
         const dry_run = core.getBooleanInput('dry_run');
@@ -47,7 +47,7 @@ async function run() {
         }
         repo_name = repo_name == '' ? github.context.repo.repo : repo_name;
         repo_owner = repo_owner == '' ? github.context.repo.owner : repo_owner;
-        let matched_refs = await (0, refs_1.matchRefs)(pattern, repo_owner, repo_name, token, retention, rm_releases, rm_tags, dry_run);
+        const matched_refs = await (0, refs_1.matchRefs)(pattern, repo_owner, repo_name, token, retention, rm_releases, rm_tags, dry_run);
         // Log the current timestamp, refs, then log the new timestamp
         core.debug(new Date().toTimeString());
         // Set outputs for other workflow steps to use

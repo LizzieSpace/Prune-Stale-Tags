@@ -8,10 +8,12 @@ import { matchRefs } from './refs'
  */
 export async function run(): Promise<void> {
   try {
-    const pattern: RegExp = new RegExp(
-      core.getInput('match-pattern', { required: true, trimWhitespace: false })
+    const pattern = new RegExp(
+      core.getInput('pattern', { required: true, trimWhitespace: false })
     )
-    const retention: number = parseInt(core.getInput('retention'))
+    const retention: number = parseInt(
+      core.getInput('retention', { required: true })
+    )
 
     const rm_tags: boolean = core.getBooleanInput('rm-tags')
     const rm_releases: boolean = core.getBooleanInput('rm-releases')
@@ -29,7 +31,7 @@ export async function run(): Promise<void> {
     repo_name = repo_name == '' ? github.context.repo.repo : repo_name
     repo_owner = repo_owner == '' ? github.context.repo.owner : repo_owner
 
-    let matched_refs = await matchRefs(
+    const matched_refs = await matchRefs(
       pattern,
       repo_owner,
       repo_name,

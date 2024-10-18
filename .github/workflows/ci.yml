@@ -60,7 +60,7 @@ jobs:
         uses: ./
         with:
           pattern: '.*'
-          retention: '3'
+          retention: 3
           rm-tags: false
           rm-releases: false
           dry-run: false

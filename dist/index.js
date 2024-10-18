@@ -29937,8 +29937,8 @@ const refs_1 = __nccwpck_require__(1977);
  */
 async function run() {
     try {
-        const pattern = new RegExp(core.getInput('match-pattern', { required: true, trimWhitespace: false }));
-        const retention = parseInt(core.getInput('retention'));
+        const pattern = new RegExp(core.getInput('pattern', { required: true, trimWhitespace: false }));
+        const retention = parseInt(core.getInput('retention', { required: true }));
         const rm_tags = core.getBooleanInput('rm-tags');
         const rm_releases = core.getBooleanInput('rm-releases');
         const dry_run = core.getBooleanInput('dry_run');
@@ -29951,7 +29951,7 @@ async function run() {
         }
         repo_name = repo_name == '' ? github.context.repo.repo : repo_name;
         repo_owner = repo_owner == '' ? github.context.repo.owner : repo_owner;
-        let matched_refs = await (0, refs_1.matchRefs)(pattern, repo_owner, repo_name, token, retention, rm_releases, rm_tags, dry_run);
+        const matched_refs = await (0, refs_1.matchRefs)(pattern, repo_owner, repo_name, token, retention, rm_releases, rm_tags, dry_run);
         // Log the current timestamp, refs, then log the new timestamp
         core.debug(new Date().toTimeString());
         // Set outputs for other workflow steps to use
@@ -30013,17 +30013,17 @@ const github = __importStar(__nccwpck_require__(3228));
  * @param dry_run Runs action as inconsequential
  */
 async function matchRefs(pattern, repository_owner, repository_name, token, retention, delete_releases = false, delete_tags = false, dry_run = false) {
-    let octokit = github.getOctokit(token);
-    let { data: refs } = await octokit.rest.git.listMatchingRefs({
+    const octokit = github.getOctokit(token);
+    const { data: refs } = await octokit.rest.git.listMatchingRefs({
         owner: repository_owner,
         repo: repository_name,
         ref: 'tags/'
     });
-    let matched = Array();
+    const matched = [];
     const matchPromises = refs.map(async (data) => {
-        let ref = data.ref.substring(10);
+        const ref = data.ref.substring(10);
         if (pattern.test(ref)) {
-            let { data: tag } = await octokit.rest.git.getTag({
+            const { data: tag } = await octokit.rest.git.getTag({
                 owner: repository_owner,
                 repo: repository_name,
                 tag_sha: data.object.sha
@@ -30032,16 +30032,18 @@ async function matchRefs(pattern, repository_owner, repository_name, token, rete
         }
     });
     await Promise.all(matchPromises);
-    let pruned_tags = new Map(), removed_releases = new Map(), kept_tags = new Map();
+    const pruned_tags = new Map(), removed_releases = new Map(), kept_tags = new Map();
     if (delete_tags || delete_releases) {
         matched.slice(0, retention).map(tag => kept_tags.set(tag.tag, tag));
         const deletionPromises = matched
-            .sort((a, b) => a.tagger.date.getTime() - b.tagger.date.getTime())
+            .sort((a, b) => {
+            const aDate = new Date(a.tagger.date);
+            const bDate = new Date(b.tagger.date);
+            return aDate.getTime() - bDate.getTime();
+        })
             .slice(retention)
-            .map(async ([tag, _]) => {
-            if (dry_run)
-                return;
-            let { data: release } = await octokit.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
+            .map(async (tag) => {
+            const { data: release } = await octokit.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
                 owner: repository_owner,
                 repo: repository_name,
                 tag: tag.tag,
@@ -30049,6 +30051,11 @@ async function matchRefs(pattern, repository_owner, repository_name, token, rete
                     'X-GitHub-Api-Version': '2022-11-28'
                 }
             });
+            if (dry_run) {
+                removed_releases.set(release.tag_name, release);
+                pruned_tags.set(tag.tag, tag);
+                return;
+            }
             await octokit
                 .request('DELETE /repos/DELETE /repos/{owner}/{repo}/releases/{release_id}', {
                 owner: repository_owner,
@@ -30071,13 +30078,11 @@ async function matchRefs(pattern, repository_owner, repository_name, token, rete
         });
         await Promise.all(deletionPromises);
     }
-    let refData;
-    refData = {
+    return {
         kept_tags: kept_tags,
         pruned_tags: pruned_tags,
         removed_releases: removed_releases
     };
-    return refData;
 }
 
 
@@ -31997,8 +32002,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
  * The entrypoint for the action.
  */
 const main_1 = __nccwpck_require__(1730);
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-(0, main_1.run)();
+(0, main_1.run)().then(() => console.log('completed'));
 
 })();
 

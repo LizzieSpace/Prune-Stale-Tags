@@ -20,7 +20,7 @@ inputs:
     description:
       Number of tags to keep. Latest tags are kept untouched, while older tags
       are removed as per `rm-tags` and `rm-releases`.
-    required: false
+    required: true
     default: 3
   rm-tags:
     type: boolean

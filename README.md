@@ -13,7 +13,7 @@ The action takes several inputs to control its behavior:
 | `retention`   | Number of tags to keep. Latest tags are kept untouched, while older tags are removed as per `rm-tags` and `rm-releases`.                                                                                                                           |  false   |         `3`         |
 | `rm-tags`     | Whether to prune associated tags.                                                                                                                                                                                                                  |  false   |       `false`       |
 | `rm-releases` | Whether to remove associated releases.                                                                                                                                                                                                             |  false   |       `false`       |
-| `dry-run`     | Runs the action as normal, but does not actually delete anything.                                                                                                                                                                                  |  false   |       `false`       |
+| `dry-run`     | Runs the action as normal, but does not actually delete anything. Will return the JSON maps that would be used when attempting to remove refs.                                                                                                     |  false   |       `false`       |
 | `repo-owner`  | Optionally specify the owner of the repo where the release should be generated. Defaults to current repo's owner.                                                                                                                                  |  false   | context repo owner  |
 | `repo-name`   | Optionally specify the repo where the release should be generated. Defaults to current repo's name.                                                                                                                                                |  false   |  context repo name  |
 | `token`       | The GitHub token. This will default to the GitHub app token. This is primarily useful if you want to use your personal token (for targeting other repos, etc). If you are using a personal access token it should have access to the `repo` scope. |  false   | `${{github.token}}` |
@@ -55,14 +55,12 @@ The action provides outputs that detail the results of the pruning process:
 
 ## Notes
 
-- You must provide a tag either via the action input or the git ref (i.e push /
-  create a tag). If you do not provide a tag the action will fail.
-- If the tag of the release you are creating does not yet exist, you should set
-  both the `tag` and `commit` action inputs. `commit` can point to a commit hash
-  or a branch name (ex - `main`).
-- In the example above only required permissions for the action specified (which
-  is `contents: write`). If you add other actions to the same workflow you
-  should expand `permissions` block accordingly.
-- More info about why the default discussion category "Announcements" does not
-  work with this action may be found here:
-  https://github.com/goreleaser/goreleaser/issues/2304.
+- For safety reasons, the action does not remove any releases unless directly
+  told to.
+- the `dry-run` input can also be used to collect the tags metadata for other
+  workflows to use, provided that you know some json manipulation magic.
+
+[//]:
+  #
+  '- In the example above only required permissions for the action specified (which'
+[//]: # '  is `contents: write`).'
