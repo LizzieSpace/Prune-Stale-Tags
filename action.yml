@@ -11,43 +11,60 @@ branding:
 # Define your inputs here.
 inputs:
   pattern:
-    description: 'Regex search pattern to match tags against'
+    description:
+      Regex search pattern used to match tags. all tags containing this pattern
+      will be selected.
     required: true
     default: '.*'
   retention:
-    description: 'Number of tags to keep from latest tags.'
+    description:
+      Number of tags to keep. Latest tags are kept untouched, while older tags
+      are removed as per `rm-tags` and `rm-releases`.
     required: false
     default: 3
-  prune-tags:
+  rm-tags:
     type: boolean
-    description: 'whether to prune associated tags'
+    description: whether to prune associated tags.
     required: false
     default: false
   rm-releases:
     type: boolean
-    description: 'whether to remove associated releases'
+    description: whether to remove associated releases.
     required: false
     default: false
   dry-run:
     type: boolean
-    description: 'whether to remove associated releases'
+    description:
+      Runs the action as normal, but does not actually delete anything.
     required: false
     default: false
   token:
-    description: 'Authentication token used'
+    description:
+      The GitHub token. This will default to the GitHub app token. This is
+      primarily useful if you want to use your personal token (for targeting
+      other repos, etc). If you are using a personal access token it should have
+      access to the `repo` scope.
     required: false
     default: '${{github.token}}'
   repo-owner:
-    description: 'for when you wish to target other repository'
+    description:
+      Optionally specify the owner of the repo where the release should be
+      generated. Defaults to current repo's owner.
     required: false
   repo-name:
-    description: 'for when you wish to target other repository'
+    description:
+      Optionally specify the repo where the release should be generated.
+      Defaults to current repo's name.
     required: false
 
 # Define your outputs here.
 outputs:
   pruned-tags:
-    description: 'List of tags that got pruned'
+    description: Map of tags that got pruned as per `rm-tags`.
+  removed-releases:
+    description: Map of releases removed as per `rm-releases`.
+  kept-tags:
+    description: Map of tags that got kept as per `retention`.
 
 runs:
   using: node20

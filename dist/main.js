@@ -35,7 +35,7 @@ async function run() {
     try {
         const pattern = new RegExp(core.getInput('match-pattern', { required: true, trimWhitespace: false }));
         const retention = parseInt(core.getInput('retention'));
-        const prune_tags = core.getBooleanInput('match-pattern');
+        const rm_tags = core.getBooleanInput('rm-tags');
         const rm_releases = core.getBooleanInput('rm-releases');
         const dry_run = core.getBooleanInput('dry_run');
         let repo_name = core.getInput('repo-name');
@@ -47,11 +47,13 @@ async function run() {
         }
         repo_name = repo_name == '' ? github.context.repo.repo : repo_name;
         repo_owner = repo_owner == '' ? github.context.repo.owner : repo_owner;
-        let matched_refs = await (0, refs_1.matchRefs)(pattern, repo_owner, repo_name, token, retention, rm_releases, prune_tags, dry_run);
+        let matched_refs = await (0, refs_1.matchRefs)(pattern, repo_owner, repo_name, token, retention, rm_releases, rm_tags, dry_run);
         // Log the current timestamp, refs, then log the new timestamp
         core.debug(new Date().toTimeString());
         // Set outputs for other workflow steps to use
-        core.setOutput('pruned-tags', JSON.stringify(matched_refs));
+        core.setOutput('pruned-tags', JSON.stringify(Object.fromEntries(matched_refs.pruned_tags)));
+        core.setOutput('removed-releases', JSON.stringify(Object.fromEntries(matched_refs.removed_releases)));
+        core.setOutput('kept-tags', JSON.stringify(Object.fromEntries(matched_refs.kept_tags)));
     }
     catch (error) {
         // Fail the workflow run if an error occurs

@@ -30,7 +30,9 @@ jobs:
 
       - name: Install Dependencies
         id: npm-ci
-        run: npm ci
+        run: |
+          npm install
+          npm ci
 
       - name: Check Format
         id: npm-format-check
@@ -59,16 +61,14 @@ jobs:
         with:
           pattern: '.*'
           retention: '3'
-          prune-tags: 'false'
-          rm-releases: 'false'
-          dry-run: 'false'
+          rm-tags: false
+          rm-releases: false
+          dry-run: false
           token: '${{github.token}}'
 
       - name: Print Output
-        if: steps.test-action.outputs.pruned-tags
         id: output
         run: |
-          echo "
-          pruned the following tags:
-          ${{steps.test-action.outputs.pruned-tags }}
-          " >> $GITHUB_STEP_SUMMARY
+          echo ${{fromJSON(steps.test-action.outputs.pruned-tags)}}
+          echo ${{fromJSON(steps.test-action.outputs.removed-releases)}}
+          echo ${{fromJSON(steps.test-action.outputs.kept-tags)}}

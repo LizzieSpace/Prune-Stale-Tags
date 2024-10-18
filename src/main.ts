@@ -13,7 +13,7 @@ export async function run(): Promise<void> {
     )
     const retention: number = parseInt(core.getInput('retention'))
 
-    const prune_tags: boolean = core.getBooleanInput('match-pattern')
+    const rm_tags: boolean = core.getBooleanInput('rm-tags')
     const rm_releases: boolean = core.getBooleanInput('rm-releases')
     const dry_run: boolean = core.getBooleanInput('dry_run')
 
@@ -36,7 +36,7 @@ export async function run(): Promise<void> {
       token,
       retention,
       rm_releases,
-      prune_tags,
+      rm_tags,
       dry_run
     )
 
@@ -44,7 +44,18 @@ export async function run(): Promise<void> {
     core.debug(new Date().toTimeString())
 
     // Set outputs for other workflow steps to use
-    core.setOutput('pruned-tags', JSON.stringify(matched_refs))
+    core.setOutput(
+      'pruned-tags',
+      JSON.stringify(Object.fromEntries(matched_refs.pruned_tags))
+    )
+    core.setOutput(
+      'removed-releases',
+      JSON.stringify(Object.fromEntries(matched_refs.removed_releases))
+    )
+    core.setOutput(
+      'kept-tags',
+      JSON.stringify(Object.fromEntries(matched_refs.kept_tags))
+    )
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
