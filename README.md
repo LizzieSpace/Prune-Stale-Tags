@@ -1,15 +1,8 @@
-[//]: # ([![GitHub Super-Linter]&#40;https://github.com/actions/typescript-action/actions/workflows/linter.yml/badge.svg&#41;]&#40;https://github.com/super-linter/super-linter&#41;)
-[//]: # (![CI]&#40;https://github.com/actions/typescript-action/actions/workflows/ci.yml/badge.svg&#41;)
-[//]: # ([![Check dist/]&#40;https://github.com/actions/typescript-action/actions/workflows/check-dist.yml/badge.svg&#41;]&#40;https://github.com/actions/typescript-action/actions/workflows/check-dist.yml&#41;)
-[//]: # ([![CodeQL]&#40;https://github.com/actions/typescript-action/actions/workflows/codeql-analysis.yml/badge.svg&#41;]&#40;https://github.com/actions/typescript-action/actions/workflows/codeql-analysis.yml&#41;)
-
-[//]: # ([![Coverage]&#40;./coverage/coverage.svg&#41;]&#40;./coverage/coverage.svg&#41;)
-
 <table class="images" align="center" style="border:0px solid white">
     <tr style="border: 0px;">
         <td style="border:0px">
-            <a href="./coverage/coverage.svg">
-                <img src="./coverage/coverage.svg"  alt="Coverage"/>
+            <a href="./__tests__/coverage.svg">
+                <img src="./__tests__/coverage.svg"  alt="Coverage"/>
             </a> 
         </td>
         <td style="border:0px">
