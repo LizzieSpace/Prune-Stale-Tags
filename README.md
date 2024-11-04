@@ -1,3 +1,40 @@
+[//]: # ([![GitHub Super-Linter]&#40;https://github.com/actions/typescript-action/actions/workflows/linter.yml/badge.svg&#41;]&#40;https://github.com/super-linter/super-linter&#41;)
+[//]: # (![CI]&#40;https://github.com/actions/typescript-action/actions/workflows/ci.yml/badge.svg&#41;)
+[//]: # ([![Check dist/]&#40;https://github.com/actions/typescript-action/actions/workflows/check-dist.yml/badge.svg&#41;]&#40;https://github.com/actions/typescript-action/actions/workflows/check-dist.yml&#41;)
+[//]: # ([![CodeQL]&#40;https://github.com/actions/typescript-action/actions/workflows/codeql-analysis.yml/badge.svg&#41;]&#40;https://github.com/actions/typescript-action/actions/workflows/codeql-analysis.yml&#41;)
+
+[//]: # ([![Coverage]&#40;./coverage/coverage.svg&#41;]&#40;./coverage/coverage.svg&#41;)
+
+<table class="images" align="center" style="border:0px solid white">
+    <tr style="border: 0px;">
+        <td style="border:0px">
+            <a href="./coverage/coverage.svg">
+                <img src="./coverage/coverage.svg"  alt="Coverage"/>
+            </a> 
+        </td>
+        <td style="border:0px">
+            <a href="https://github.com/actions/typescript-action/actions/workflows/check-dist.yml">
+                <img src="https://github.com/actions/typescript-action/actions/workflows/check-dist.yml/badge.svg"  alt="Check dist/"/>
+            </a> 
+        </td>
+        <td style="border:0px">
+            <a href="https://github.com/actions/typescript-action/actions/workflows/codeql-analysis.yml">
+                <img src="https://github.com/actions/typescript-action/actions/workflows/ci.yml/badge.svg"  alt="CI"/>
+            </a> 
+        </td>
+        <td  style="border:0px">
+            <a href="">
+                <img src="https://github.com/actions/typescript-action/actions/workflows/codeql-analysis.yml/badge.svg"  alt="CodeQL"/>
+            </a> 
+        </td>
+        <td  style="border:0px">
+            <a href="https://github.com/super-linter/super-linter">
+                <img src="https://github.com/actions/typescript-action/actions/workflows/linter.yml/badge.svg"  alt="GitHub Super-Linter"/>
+            </a> 
+        </td>
+    </tr>
+</table>
+
 # Prune tags Action
 
 The action prunes selected releases and tags from a GitHub repository according
