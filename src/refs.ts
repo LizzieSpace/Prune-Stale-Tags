@@ -12,7 +12,7 @@ import * as github from '@actions/github'
  * @param delete_tags Whether to delete tags. Will also remove releases.
  * @param dry_run Runs action as inconsequential
  */
-export async function matchRefs(
+export async function processRefs(
   pattern: RegExp,
   repository_owner: string,
   repository_name: string,
@@ -88,7 +88,7 @@ export async function matchRefs(
 
         if (dry_run) {
           removed_releases.set(release.tag_name, release)
-          pruned_tags.set(tag.tag, tag)
+          if (delete_tags) pruned_tags.set(tag.tag, tag)
           return
         }
         await octokit

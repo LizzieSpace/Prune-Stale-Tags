@@ -3,4 +3,4 @@
  */
 import { run } from './main'
 
-run().then(() => console.log('completed'))
+run()

@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.matchRefs = matchRefs;
+exports.processRefs = processRefs;
 const github = __importStar(require("@actions/github"));
 /**
  * Searches repository for tags matching the given pattern.
@@ -37,7 +37,7 @@ const github = __importStar(require("@actions/github"));
  * @param delete_tags Whether to delete tags. Will also remove releases.
  * @param dry_run Runs action as inconsequential
  */
-async function matchRefs(pattern, repository_owner, repository_name, token, retention, delete_releases = false, delete_tags = false, dry_run = false) {
+async function processRefs(pattern, repository_owner, repository_name, token, retention, delete_releases = false, delete_tags = false, dry_run = false) {
     const octokit = github.getOctokit(token);
     const { data: refs } = await octokit.rest.git.listMatchingRefs({
         owner: repository_owner,
@@ -78,7 +78,8 @@ async function matchRefs(pattern, repository_owner, repository_name, token, rete
             });
             if (dry_run) {
                 removed_releases.set(release.tag_name, release);
-                pruned_tags.set(tag.tag, tag);
+                if (delete_tags)
+                    pruned_tags.set(tag.tag, tag);
                 return;
             }
             await octokit

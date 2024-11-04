@@ -11,13 +11,13 @@ branding:
 # Define your inputs here.
 inputs:
   pattern:
-    description:
+    description: >
       Regex search pattern used to match tags. all tags containing this pattern
       will be selected.
     required: true
     default: '.*'
   retention:
-    description:
+    description: >
       Number of tags to keep. Latest tags are kept untouched, while older tags
       are removed as per `rm-tags` and `rm-releases`.
     required: true
@@ -34,28 +34,24 @@ inputs:
     default: false
   dry-run:
     type: boolean
-    description:
+    description: >
       Runs the action as normal, but does not actually delete anything.
     required: false
     default: false
   token:
-    description:
+    description: >
       The GitHub token. This will default to the GitHub app token. This is
       primarily useful if you want to use your personal token (for targeting
       other repos, etc). If you are using a personal access token it should have
       access to the `repo` scope.
     required: false
     default: '${{github.token}}'
-  repo-owner:
-    description:
-      Optionally specify the owner of the repo where the release should be
-      generated. Defaults to current repo's owner.
+  repository:
+    description: >
+      Optionally specify the repo where the tags should be searched and removed.
+      Defaults to current repo.
     required: false
-  repo-name:
-    description:
-      Optionally specify the repo where the release should be generated.
-      Defaults to current repo's name.
-    required: false
+    default: ${{github.repository}}
 
 # Define your outputs here.
 outputs:

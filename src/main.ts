@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { matchRefs } from './refs'
+import { processRefs } from './refs'
 
 /**
  * The main function for the action.
@@ -19,19 +19,28 @@ export async function run(): Promise<void> {
     const rm_releases: boolean = core.getBooleanInput('rm-releases')
     const dry_run: boolean = core.getBooleanInput('dry_run')
 
-    let repo_name: string = core.getInput('repo-name')
-    let repo_owner: string = core.getInput('repo-owner')
     const token: string = core.getInput('token')
+
+    let repo_owner: string
+    let repo_name: string
+    ;[repo_owner, repo_name] = core.getInput('repository').split('/')
 
     core.setSecret(token)
 
     if (isNaN(retention)) {
-      throw new TypeError('Not a number')
+      core.setFailed(`retention input is Not a number`)
     }
-    repo_name = repo_name == '' ? github.context.repo.repo : repo_name
-    repo_owner = repo_owner == '' ? github.context.repo.owner : repo_owner
 
-    const matched_refs = await matchRefs(
+    // if repository name is null (or an empty string) set context. else, set input
+    repo_name = repo_name ? repo_name : github.context.repo.repo
+    repo_owner = repo_owner ? repo_owner : github.context.repo.owner
+
+    let matchStartDate: Date
+    let matchEndDate: Date
+    core.debug(
+      `matching refs... started at: ${((matchStartDate = new Date()), matchStartDate.toISOString())}`
+    )
+    const matched_refs = await processRefs(
       pattern,
       repo_owner,
       repo_name,
@@ -41,9 +50,9 @@ export async function run(): Promise<void> {
       rm_tags,
       dry_run
     )
-
-    // Log the current timestamp, refs, then log the new timestamp
-    core.debug(new Date().toTimeString())
+    core.debug(
+      `finished after ${((matchEndDate = new Date()), matchEndDate.getTime() - matchStartDate.getTime())} ms`
+    )
 
     // Set outputs for other workflow steps to use
     core.setOutput(

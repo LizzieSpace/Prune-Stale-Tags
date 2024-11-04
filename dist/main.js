@@ -38,18 +38,22 @@ async function run() {
         const rm_tags = core.getBooleanInput('rm-tags');
         const rm_releases = core.getBooleanInput('rm-releases');
         const dry_run = core.getBooleanInput('dry_run');
-        let repo_name = core.getInput('repo-name');
-        let repo_owner = core.getInput('repo-owner');
         const token = core.getInput('token');
+        let repo_owner;
+        let repo_name;
+        [repo_owner, repo_name] = core.getInput('repository').split('/');
         core.setSecret(token);
         if (isNaN(retention)) {
-            throw new TypeError('Not a number');
+            core.setFailed(`retention input is Not a number`);
         }
-        repo_name = repo_name == '' ? github.context.repo.repo : repo_name;
-        repo_owner = repo_owner == '' ? github.context.repo.owner : repo_owner;
-        const matched_refs = await (0, refs_1.matchRefs)(pattern, repo_owner, repo_name, token, retention, rm_releases, rm_tags, dry_run);
-        // Log the current timestamp, refs, then log the new timestamp
-        core.debug(new Date().toTimeString());
+        // if repository name is null (or an empty string) set context. else, set input
+        repo_name = repo_name ? repo_name : github.context.repo.repo;
+        repo_owner = repo_owner ? repo_owner : github.context.repo.owner;
+        let matchStartDate;
+        let matchEndDate;
+        core.debug(`matching refs... started at: ${((matchStartDate = new Date()), matchStartDate.toISOString())}`);
+        const matched_refs = await (0, refs_1.processRefs)(pattern, repo_owner, repo_name, token, retention, rm_releases, rm_tags, dry_run);
+        core.debug(`finished after ${((matchEndDate = new Date()), matchEndDate.getTime() - matchStartDate.getTime())} ms`);
         // Set outputs for other workflow steps to use
         core.setOutput('pruned-tags', JSON.stringify(Object.fromEntries(matched_refs.pruned_tags)));
         core.setOutput('removed-releases', JSON.stringify(Object.fromEntries(matched_refs.removed_releases)));
