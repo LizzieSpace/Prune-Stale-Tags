@@ -2,8 +2,8 @@
  * Unit tests for src/refs.ts
  */
 import 'jest-extended'
-import 'lodash.product';
-import _ from 'lodash';
+import 'lodash.product'
+import _ from 'lodash'
 
 import * as github from '@actions/github'
 import * as refs from '../src/refs'
@@ -143,62 +143,65 @@ describe.each(Array(10).fill(null))('refs.ts (stress test #%#)', () => {
     _.product(
       [true, false], //dry_run
       [true, false], //del_tags
-      [true, false]  //del_releases
+      [true, false] //del_releases
     )
-  )('bool args', (dry_run: boolean, del_tags: boolean, del_releases: boolean) => {
-    let description: string
-    switch (true) {
-      case dry_run:
-        description = `should dry run (del_tags:${del_tags}, del_releases:${del_releases})`
-        break
-      case del_tags:
-        description = `should del tags and releases (del_releases:${del_releases})`
-        break
-      case del_releases && !del_tags:
-        description = 'should del only releases'
-        break
-      case !del_releases && !del_tags && !dry_run:
-        description = 'should run successfully (all bool args false)'
-        break
-      default:
-        description = 'should run successfully'
+  )(
+    'bool args',
+    (dry_run: boolean, del_tags: boolean, del_releases: boolean) => {
+      let description: string
+      switch (true) {
+        case dry_run:
+          description = `should dry run (del_tags:${del_tags}, del_releases:${del_releases})`
+          break
+        case del_tags:
+          description = `should del tags and releases (del_releases:${del_releases})`
+          break
+        case del_releases && !del_tags:
+          description = 'should del only releases'
+          break
+        case !del_releases && !del_tags && !dry_run:
+          description = 'should run successfully (all bool args false)'
+          break
+        default:
+          description = 'should run successfully'
+      }
+      // eslint-disable-next-line jest/valid-title
+      it(description, async () => {
+        const { kept_tags, pruned_tags, removed_releases } = await processRefs(
+          pattern,
+          repo_owner,
+          repo_name,
+          token,
+          retention,
+          del_releases,
+          del_tags,
+          dry_run
+        )
+
+        expect(processRefsMock).toHaveBeenCalled()
+        expect(mockListMatchingRefs).toHaveBeenCalledTimes(1)
+        expect(mockRequestTag).toHaveBeenCalledTimes(
+          del_releases || del_tags ? expectedMatchedLen : 0
+        )
+        expect(mockRequestDel).toHaveBeenCalledTimes(
+          (del_releases || del_tags) && !dry_run ? expectedMatchedLen : 0
+        )
+        expect(mockDeleteRef).toHaveBeenCalledTimes(
+          del_tags && !dry_run ? expectedMatchedLen : 0
+        )
+
+        expect(kept_tags.size).toBeLessThanOrEqual(retention)
+        expect(removed_releases.size).toBe(
+          del_releases || del_tags ? expectedMatchedLen : 0
+        )
+        expect(pruned_tags.size).toBe(del_tags ? expectedMatchedLen : 0)
+
+        expect(kept_tags).toBeInstanceOf(Map)
+        expect(pruned_tags).toBeInstanceOf(Map)
+        expect(removed_releases).toBeInstanceOf(Map)
+      })
     }
-    // eslint-disable-next-line jest/valid-title
-    it(description, async () => {
-      const { kept_tags, pruned_tags, removed_releases } = await processRefs(
-        pattern,
-        repo_owner,
-        repo_name,
-        token,
-        retention,
-        del_releases,
-        del_tags,
-        dry_run
-      )
-
-      expect(processRefsMock).toHaveBeenCalled()
-      expect(mockListMatchingRefs).toHaveBeenCalledTimes(1)
-      expect(mockRequestTag).toHaveBeenCalledTimes(
-        del_releases || del_tags ? expectedMatchedLen : 0
-      )
-      expect(mockRequestDel).toHaveBeenCalledTimes(
-        (del_releases || del_tags) && !dry_run ? expectedMatchedLen : 0
-      )
-      expect(mockDeleteRef).toHaveBeenCalledTimes(
-        del_tags && !dry_run ? expectedMatchedLen : 0
-      )
-
-      expect(kept_tags.size).toBeLessThanOrEqual(retention)
-      expect(removed_releases.size).toBe(
-        del_releases || del_tags ? expectedMatchedLen : 0
-      )
-      expect(pruned_tags.size).toBe(del_tags ? expectedMatchedLen : 0)
-
-      expect(kept_tags).toBeInstanceOf(Map)
-      expect(pruned_tags).toBeInstanceOf(Map)
-      expect(removed_releases).toBeInstanceOf(Map)
-    })
-  })
+  )
 
   it('should run even when bool args unspecified', async () => {
     await processRefs(pattern, repo_owner, repo_name, token, retention)
